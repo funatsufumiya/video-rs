@@ -15,41 +15,7 @@ use ffmpeg::util::format::Pixel;
 
 use ffmpeg::ffi::*;
 
-// 00065 enum PixelFormat {
-//     00066     PIX_FMT_NONE= -1,
-//     00067     PIX_FMT_YUV420P,   
-//     00068     PIX_FMT_YUYV422,   
-//     00069     PIX_FMT_RGB24,     
-//     00070     PIX_FMT_BGR24,     
-//     00071     PIX_FMT_YUV422P,   
-//     00072     PIX_FMT_YUV444P,   
-//     00073     PIX_FMT_YUV410P,   
-//     00074     PIX_FMT_YUV411P,   
-//     00075     PIX_FMT_GRAY8,     
-//     00076     PIX_FMT_MONOWHITE, 
-//     00077     PIX_FMT_MONOBLACK, 
-//     00078     PIX_FMT_PAL8,      
-//     00079     PIX_FMT_YUVJ420P,  
-//     00080     PIX_FMT_YUVJ422P,  
-//     00081     PIX_FMT_YUVJ444P,  
-//     00082     PIX_FMT_XVMC_MPEG2_MC,
-//     00083     PIX_FMT_XVMC_MPEG2_IDCT,
-//     00084     PIX_FMT_UYVY422,   
-//     00085     PIX_FMT_UYYVYY411, 
-//     00086     PIX_FMT_BGR8,      
-//     00087     PIX_FMT_BGR4,      
-//     00088     PIX_FMT_BGR4_BYTE, 
-//     00089     PIX_FMT_RGB8,      
-//     00090     PIX_FMT_RGB4,      
-//     00091     PIX_FMT_RGB4_BYTE, 
-//     00092     PIX_FMT_NV12,      
-//     00093     PIX_FMT_NV21,      
-//     00094 
-//     00095     PIX_FMT_ARGB,      
-//     00096     PIX_FMT_RGBA,      
-//     00097     PIX_FMT_ABGR,      
-
-const AV_PIX_FMT_BGRA: std::ffi::c_int = 34;
+const AV_PIX_FMT_BGRA: AVPixelFormat = AVPixelFormat::AV_PIX_FMT_BGRA;
 
 /// This function is similar to the existing bindings in ffmpeg-next like `output` and `output_as`,
 /// but does not assume that it is opening a file-like context. Instead, it opens a raw output,
