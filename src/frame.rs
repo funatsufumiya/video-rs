@@ -14,4 +14,5 @@ pub type RawFrame = AvFrame;
 pub type Frame = crate::ffi::FrameArray;
 
 /// Default frame pixel format.
-pub(crate) const FRAME_PIXEL_FORMAT: AvPixel = AvPixel::RGB24;
+// pub(crate) const FRAME_PIXEL_FORMAT: AvPixel = AvPixel::RGB24;
+pub(crate) const FRAME_PIXEL_FORMAT: AvPixel = AvPixel::BGRA;
