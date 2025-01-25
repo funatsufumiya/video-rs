@@ -15,7 +15,11 @@ use ffmpeg::util::format::Pixel;
 
 use ffmpeg::ffi::*;
 
+#[cfg(feature = "ndarray")]
 const AV_PIX_FMT_BGRA: AVPixelFormat = AVPixelFormat::AV_PIX_FMT_BGRA;
+
+#[cfg(feature = "ndarray")]
+const BGRA: Pixel = Pixel::BGRA;
 
 /// This function is similar to the existing bindings in ffmpeg-next like `output` and `output_as`,
 /// but does not assume that it is opening a file-like context. Instead, it opens a raw output,
@@ -299,7 +303,8 @@ pub fn convert_ndarray_to_frame_rgb24(frame_array: &FrameArray) -> Result<Frame,
             return Err(Error::from(bytes_copied));
         }
 
-        let mut frame = Frame::new(Pixel::RGB24, frame_width as u32, frame_height as u32);
+        // let mut frame = Frame::new(Pixel::RGB24, frame_width as u32, frame_height as u32);
+        let mut frame = Frame::new(Pixel::BGRA, frame_width as u32, frame_height as u32);
         let frame_ptr = frame.as_mut_ptr();
 
         // Do the actual copying.
