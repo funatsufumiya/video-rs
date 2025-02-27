@@ -1,4 +1,4 @@
-extern crate ffmpeg_next as ffmpeg;
+extern crate ffmpeg_the_third as ffmpeg;
 
 use ffmpeg::codec::codec::Codec as AvCodec;
 use ffmpeg::codec::encoder::video::Encoder as AvEncoder;
@@ -9,12 +9,15 @@ use ffmpeg::codec::{Context as AvContext, Id as AvCodecId};
 use ffmpeg::format::flag::Flags as AvFormatFlags;
 use ffmpeg::software::scaling::context::Context as AvScaler;
 use ffmpeg::software::scaling::flag::Flags as AvScalerFlags;
-use ffmpeg::util::error::EAGAIN;
+// use ffmpeg::util::error::EAGAIN;
 use ffmpeg::util::format::Pixel as AvPixel;
 use ffmpeg::util::mathematics::rescale::TIME_BASE;
 use ffmpeg::util::picture::Type as AvFrameType;
 use ffmpeg::Error as AvError;
 use ffmpeg::Rational as AvRational;
+
+use ffmpeg::codec::Parameters as AvCodecParameters;
+use ffmpeg::codec::ParametersRef as AvCodecParametersRef;
 
 use crate::error::Error;
 use crate::ffi;
@@ -27,6 +30,17 @@ use crate::location::Location;
 use crate::options::Options;
 #[cfg(feature = "ndarray")]
 use crate::time::Time;
+
+// ParametersRaw into Parameters
+struct ParametersWrapper<'a>(AvCodecParametersRef<'a>);
+
+impl<'a> From<ParametersWrapper<'a>> for AvCodecParameters {
+    fn from(wrapper: ParametersWrapper<'a>) -> Self {
+        unsafe {
+            AvCodecParameters::from_raw(wrapper.0.as_ptr() as *mut _).unwrap()
+        }
+    }
+}
 
 type Result<T> = std::result::Result<T, Error>;
 
@@ -257,6 +271,8 @@ impl Encoder {
             encoder_context.set_flags(AvCodecFlags::GLOBAL_HEADER);
         }
 
+        writer_stream.copy_parameters_from_context(&encoder_context);
+
         let mut encoder = encoder_context.encoder().video()?;
         settings.apply_to(&mut encoder);
 
@@ -267,7 +283,8 @@ impl Encoder {
         let encoder = encoder.open_with(settings.options().to_dict())?;
         let encoder_time_base = ffi::get_encoder_time_base(&encoder);
 
-        writer_stream.set_parameters(&encoder);
+        // writer_stream.set_parameters(&encoder);
+        // writer_stream.copy_parameters_from_context(&encoder);
 
         let scaler_width = encoder.width();
         let scaler_height = encoder.height();
@@ -296,7 +313,6 @@ impl Encoder {
             have_written_trailer: false,
         })
     }
-
     /// Apply scaling (or pixel reformatting in this case) on the frame with the scaler we
     /// initialized earlier.
     ///
@@ -321,7 +337,8 @@ impl Encoder {
         let encode_result = self.encoder.receive_packet(&mut packet);
         match encode_result {
             Ok(()) => Ok(Some(packet)),
-            Err(AvError::Other { errno }) if errno == EAGAIN => Ok(None),
+            // 11 is EAGAIN.
+            Err(AvError::Other { errno }) if errno == 11 => Ok(None),
             Err(err) => Err(err.into()),
         }
     }

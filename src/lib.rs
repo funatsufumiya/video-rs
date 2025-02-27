@@ -33,4 +33,4 @@ pub use resize::Resize;
 pub use time::Time;
 
 /// Re-export backend `ffmpeg` library.
-pub use ffmpeg_next as ffmpeg;
+pub use ffmpeg_the_third as ffmpeg;

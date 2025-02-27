@@ -1,11 +1,11 @@
-extern crate ffmpeg_next as ffmpeg;
+extern crate ffmpeg_the_third as ffmpeg;
 
 use ffmpeg::codec::packet::Packet as AvPacket;
 use ffmpeg::ffi::AV_TIME_BASE_Q;
 use ffmpeg::format::context::{Input as AvInput, Output as AvOutput};
 use ffmpeg::media::Type as AvMediaType;
 use ffmpeg::Error as AvError;
-use ffmpeg_next::ffi::av_seek_frame;
+use ffmpeg::ffi::av_seek_frame;
 
 use crate::error::Error;
 use crate::ffi;
@@ -113,10 +113,13 @@ impl Reader {
         let mut error_count = 0;
         loop {
             match self.input.packets().next() {
-                Some((stream, packet)) => {
+                Some(Ok((stream, packet))) => {
                     if stream.index() == stream_index {
                         return Ok(Packet::new(packet, stream.time_base()));
                     }
+                }
+                Some(Err(e)) => {
+                    return Err(Error::BackendError(e));
                 }
                 None => {
                     error_count += 1;

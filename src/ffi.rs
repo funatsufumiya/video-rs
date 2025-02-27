@@ -1,4 +1,7 @@
-extern crate ffmpeg_next as ffmpeg;
+extern crate ffmpeg_the_third as ffmpeg;
+
+use ffmpeg::codec::Parameters as AvCodecParameters;
+use ffmpeg::codec::ParametersRef as AvCodecParametersRef;
 
 #[cfg(feature = "ndarray")]
 use ndarray::Array3;
@@ -363,6 +366,17 @@ pub fn convert_frame_to_ndarray_rgb24(frame: &mut Frame) -> Result<FrameArray, E
     }
 }
 
+// ParametersRaw into Parameters
+struct ParametersWrapper2<'a>(AvCodecParametersRef<'a>);
+
+impl<'a> From<ParametersWrapper2<'a>> for AvCodecParameters {
+    fn from(wrapper: ParametersWrapper2<'a>) -> Self {
+        unsafe {
+            AvCodecParameters::from_raw(wrapper.0.as_ptr() as *mut _).unwrap()
+        }
+    }
+}
+
 /// Retrieve a reference to the extradata bytes in codec parameters of an output stream.
 ///
 /// # Arguments
@@ -370,9 +384,9 @@ pub fn convert_frame_to_ndarray_rgb24(frame: &mut Frame) -> Result<FrameArray, E
 /// * `output` - Output that contains stream to get extradata from.
 /// * `stream_index` - Index of stream.
 pub fn extradata(output: &Output, stream_index: usize) -> Result<&[u8], Error> {
-    let parameters = output
+    let parameters: AvCodecParameters = output
         .stream(stream_index)
-        .map(|stream| stream.parameters())
+        .map(|stream| ParametersWrapper2(stream.parameters()).into())
         .ok_or(Error::StreamNotFound)?;
 
     Ok(unsafe {

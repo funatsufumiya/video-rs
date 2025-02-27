@@ -1,10 +1,10 @@
-extern crate ffmpeg_next as ffmpeg;
+extern crate ffmpeg_the_third as ffmpeg;
 
 use ffmpeg::codec::decoder::Video as AvDecoder;
 use ffmpeg::codec::Context as AvContext;
 use ffmpeg::format::pixel::Pixel as AvPixel;
 use ffmpeg::software::scaling::{context::Context as AvScaler, flag::Flags as AvScalerFlags};
-use ffmpeg::util::error::EAGAIN;
+// use ffmpeg::util::error::EAGAIN;
 use ffmpeg::{Error as AvError, Rational as AvRational};
 
 use crate::error::Error;
@@ -567,7 +567,8 @@ impl DecoderSplit {
         match decode_result {
             Ok(()) => Ok(Some(frame)),
             Err(AvError::Eof) => Err(Error::ReadExhausted),
-            Err(AvError::Other { errno }) if errno == EAGAIN => Ok(None),
+            // 11 means EAGAIN
+            Err(AvError::Other { errno }) if errno == 11 => Ok(None),
             Err(err) => Err(err.into()),
         }
     }
